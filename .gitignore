@@ -10,7 +10,9 @@ maps/DLP_toolkit*
 eval/cache/
 .venv/
 __pycache__
+*.egg-info
 
 #personal docs for myself
 CLAUDE.md
 .claude/
+

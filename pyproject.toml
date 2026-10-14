@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trajectory-risk"
+version = "0.1.0"
+requires-python = ">=3.10,<3.11" # have not tested on 3.9, once tested I can include >=3.9,<3.11
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
