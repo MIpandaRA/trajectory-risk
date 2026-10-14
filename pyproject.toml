@@ -6,7 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "trajectory-risk"
 version = "0.1.0"
 requires-python = ">=3.10,<3.11" # have not tested on 3.9, once tested I can include >=3.9,<3.11
-dependencies = []
+dependencies = ["numpy>=1.22,<2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
 
 [tool.setuptools.packages.find]
 where = ["src"]
