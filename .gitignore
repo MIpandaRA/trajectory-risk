@@ -1,0 +1,16 @@
+#file too big
+data/dlp/ 
+
+#licensed, not for me to publish
+release_assets/
+checkpoints/ 
+maps/DLP_toolkit*
+
+#generated
+eval/cache/
+.venv/
+__pycache__
+
+#personal docs for myself
+CLAUDE.md
+.claude/
