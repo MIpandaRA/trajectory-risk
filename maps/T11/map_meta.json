@@ -1,0 +1,7 @@
+{
+  "world_width_m": 80.0,
+  "world_height_m": 60.0,
+  "pixels_per_metre": 10.0,
+  "road_category": "driveable_area",
+  "_comment": "road_category is the COCO category name in roboflow_export/_annotations.coco.json that marks drivable road surface. T11's export also has a 'carpark' category but it has ZERO annotations -- a leftover default from the original interactive editor tool, not this map's real road layer. Window 1 uses this mask's complement as the pedestrian walkable area (see pedestrian.py); Window 2 uses semantic_map.pkl (a separately-built, higher-resolution multi-channel version of the same road geometry) for ContextVAE's map-conditioning branch and the drivable-area overlay it draws. world_width_m/world_height_m is the real-world extent basemap.png and semantic_map.pkl were both built at, at pixels_per_metre resolution -- see ARCHITECTURE.md's 'Adding a new map' section for how these three files relate and how to regenerate them for a new site."
+}
