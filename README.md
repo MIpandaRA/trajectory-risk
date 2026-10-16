@@ -143,16 +143,8 @@ uv pip install "torch==1.11.0+cpu" "torchvision==0.12.0+cpu" --index-url https:/
 uv pip install -e ".[dev]"
 ```
 
-**Fedora and other distributions with glibc 2.41+:** torch 1.11 fails to load
-with "cannot enable executable stack". Clear the flag once:
-
-```bash
-uv pip install patchelf
-for f in .venv/lib/python3.10/site-packages/torch/lib/*.so*; do patchelf --clear-execstack "$f"; done
-```
-
 **Model weights** are not in this repository (`checkpoints/` is ignored). Both
-are the authors' own pretrained models:
+are the original ContextVAE and SocialVAE authors' own pretrained models:
 
 ```bash
 mkdir -p checkpoints/contextvae checkpoints/socialvae
