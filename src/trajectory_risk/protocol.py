@@ -59,6 +59,8 @@ class AgentState:
 
     @classmethod
     def from_dict(cls, d: dict) -> "AgentState":
+        if not isinstance(d, dict):
+            raise ProtocolError(f"agent record must be an object, got {d!r}")
         try:
             if "x_m" in d:
                 a = cls(int(d["id"]), str(d["type"]), d["x_m"], d["y_m"], d["heading_rad"], d["speed_mps"])
@@ -66,6 +68,10 @@ class AgentState:
                 a = cls(int(d["id"]), str(d["type"]), d["x"], d["y"], d["heading"], d["speed"])
         except KeyError as e:
             raise ProtocolError(f"agent record missing field {e.args[0]!r}: {d}") from None
+        except (TypeError, ValueError):
+            # e.g. "id": "abc" or "id": null. Anything that is not a ProtocolError
+            # would escape the consumer's error handling and crash it.
+            raise ProtocolError(f"agent record has an invalid id: {d.get('id')!r}") from None
         a.validate()
         return a
 
@@ -89,14 +95,29 @@ class Tick:
 
     @classmethod
     def from_dict(cls, d: dict, tick_rate_hz: float = 60.0) -> "Tick":
+        """Every malformed message raises ProtocolError, never another error type:
+        consumers catch ProtocolError to drop a bad tick and keep running."""
+        if not isinstance(d, dict):
+            raise ProtocolError(f"tick message must be an object, got {d!r}")
         if d.get("type") != "tick":
             raise ProtocolError(f"not a tick message: type={d.get('type')!r}")
-        if "seq" in d:
-            seq, t_s = int(d["seq"]), float(d["t_s"])
-        else:  # schema v1
-            seq = int(d["tick"])
-            t_s = float(d.get("t", seq / tick_rate_hz))
-        tick = cls(seq, t_s, [AgentState.from_dict(a) for a in d.get("agents", [])])
+        # Schema v1 has no schema_version. A message that declares v2 or later
+        # must carry the v2 fields, instead of being misread as v1.
+        is_v1 = "seq" not in d and d.get("schema_version") is None
+        try:
+            if not is_v1:
+                seq, t_s = int(d["seq"]), float(d["t_s"])
+            else:
+                seq = int(d["tick"])
+                t_s = float(d.get("t", seq / tick_rate_hz))
+        except KeyError as e:
+            raise ProtocolError(f"tick message missing field {e.args[0]!r}") from None
+        except (TypeError, ValueError):
+            raise ProtocolError(f"tick message has an invalid seq or time: {d}") from None
+        agents = d.get("agents", [])
+        if not isinstance(agents, list):
+            raise ProtocolError(f"tick {seq}: agents must be a list, got {agents!r}")
+        tick = cls(seq, t_s, [AgentState.from_dict(a) for a in agents])
         tick.validate()
         return tick
 
