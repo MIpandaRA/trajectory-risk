@@ -13,10 +13,9 @@ dashboard at 60 updates a second.
 
 ![Left: the scene, drawn from the recordings. Right: live predictions, calibrated risk and alerts on the same seconds](demo/dlp_side_by_side.gif)
 
-*Real drone data: [Dragon Lake Parking](https://sites.google.com/berkeley.edu/dlp-dataset)
-recording DJI_0003, 51–69 s. **Left**, the scene: parked cars, aisles, the
-tracked vehicles and pedestrians, all drawn from the CC0 recordings (parking
-spaces are estimated from where cars parked). **Right**, the same seconds in the
+*Drone data: [Dragon Lake Parking](https://sites.google.com/berkeley.edu/dlp-dataset)
+recording. **Left**, the scene: parked cars, aisles, the
+tracked vehicles and pedestrians. **Right**, the same seconds in the
 dashboard: orange and violet lines are the predicted futures of vehicles and
 pedestrians, a red ring is an active alert, and the panel lists the calibrated
 risk of each car–pedestrian pair. The dataset authors' own semantic
