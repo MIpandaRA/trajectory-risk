@@ -1,0 +1,7 @@
+subset,comparison,recalibration,n_recordings,auroc_diff,auroc_diff_lo,auroc_diff_hi,pr_auc_diff,pr_auc_diff_lo,pr_auc_diff_hi
+within_15m,learned (b) - CV (b),raw,6,0.13625,0.104312,0.179787,-0.149028,-0.222624,-0.025339
+within_15m,learned (b) - CV (b),platt,6,0.136296,0.104368,0.179808,-0.145104,-0.222128,-0.019285
+within_15m,learned (b) - CV (b),isotonic,6,0.138511,0.108821,0.182618,-0.158772,-0.226567,-0.05377
+all,learned (b) - CV (b),raw,6,0.180719,0.156581,0.229746,-0.145518,-0.21934,-0.02069
+all,learned (b) - CV (b),platt,6,0.180723,0.156587,0.229748,-0.141612,-0.217676,-0.014642
+all,learned (b) - CV (b),isotonic,6,0.180921,0.156787,0.229755,-0.155218,-0.222859,-0.04923

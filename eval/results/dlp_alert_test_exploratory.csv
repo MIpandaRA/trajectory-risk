@@ -1,0 +1,2 @@
+split,option,false_alerts,minutes,events,caught,warnings_negative,n_recordings,false_alerts_per_min,false_alerts_per_min_lo,false_alerts_per_min_hi,event_recall,event_recall_lo,event_recall_hi,median_warning_s,median_warning_s_lo,median_warning_s_hi
+test (exploratory),C,54,40.19,177,128,103,6,1.3436,0.6065,2.0175,0.7232,0.5921,0.7982,-0.25,-0.2833,-0.2167

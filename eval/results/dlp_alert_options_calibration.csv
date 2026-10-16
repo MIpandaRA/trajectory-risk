@@ -1,0 +1,6 @@
+option,enter_threshold,level_used,clear_rule,clear_threshold,enter_ticks,clear_ticks,false_alerts,minutes,events,caught,warnings_negative,n_recordings,false_alerts_per_min,false_alerts_per_min_lo,false_alerts_per_min_hi,event_recall,event_recall_lo,event_recall_hi,median_warning_s,median_warning_s_lo,median_warning_s_hi
+A,0.0783,0.0783,enter/3,0.0261,1,5,344,70.6533,280,260,79,10,4.8688,3.9331,5.7919,0.9286,0.8889,0.9664,0.225,0.0833,0.4833
+B,0.5187,0.5187,0.02,0.02,1,5,196,70.6533,280,240,134,10,2.7741,2.2247,3.4933,0.8571,0.8174,0.893,-0.0167,-0.0333,-0.0167
+C,0.4362,0.4362,enter/3,0.1454,2,5,62,70.6533,280,213,168,10,0.8775,0.3948,1.457,0.7607,0.7094,0.8046,-0.2333,-0.2333,-0.2167
+D,0.4362,0.4362,enter/3,0.1454,3,5,38,70.6533,280,182,155,10,0.5378,0.2163,0.9824,0.65,0.6059,0.6983,-0.4167,-0.4333,-0.4
+E,0.301,0.301,0.02,0.02,5,5,75,70.6533,280,142,90,10,1.0615,0.8042,1.3155,0.5071,0.4648,0.5537,-0.3167,-0.6835,-0.1

@@ -1,0 +1,5 @@
+subset,quantity,learned,cv
+within_15m,cv_fpr,,0.002898
+within_15m,tpr_at_cv_fpr,0.313641,0.60532
+within_15m,roc_area_below_cv_fpr,0.000483,0.000877
+within_15m,roc_area_above_cv_fpr,0.936978,0.800334

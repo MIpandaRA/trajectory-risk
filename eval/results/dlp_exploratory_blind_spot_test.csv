@@ -1,0 +1,6 @@
+subset,group,level,positives,vehicle_at_rest,share_at_rest,ci_lo,ci_hi,n_recordings
+within_15m,CV (b) = 0,pair-update,1276,255,0.199843,0.148794,0.262774,6
+within_15m,CV (b) = 1,pair-update,1957,37,0.018906,0.013764,0.029205,6
+within_15m,difference (score 0 - score 1),pair-update,,,0.180937,0.129698,0.239527,6
+within_15m,CV (b) = 0,encounter (first update),128,21,0.164062,,,6
+within_15m,CV (b) = 1,encounter (first update),49,1,0.020408,,,6

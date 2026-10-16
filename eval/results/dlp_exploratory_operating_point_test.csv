@@ -1,0 +1,7 @@
+subset,quantity,point,ci_lo,ci_hi,n_recordings,nan_replicates
+within_15m,cv_recall,0.60532,0.50929,0.655098,6,0
+within_15m,cv_precision,0.62926,0.548899,0.68471,6,0
+within_15m,learned_precision_at_cv_recall,0.073192,0.040929,0.158976,6,0
+within_15m,learned_recall_at_cv_precision,0.0,0.0,0.422865,6,0
+within_15m,precision_diff,-0.556068,-0.594991,-0.497048,6,0
+within_15m,recall_diff,-0.60532,-0.650683,-0.223127,6,0
