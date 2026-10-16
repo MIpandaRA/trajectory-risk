@@ -87,6 +87,12 @@ The built-in simulator, on two maps: **T11**, a small car park, and
 cars never change speed and pedestrians walk in straight lines, which flatters
 constant velocity.
 
+![Left: the simulated T11 car park. Right: live predictions and risk on the same seconds](demo/t11_side_by_side.gif)
+
+*Simulated T11 car park, scenario `t11_crossing`, 40–54 s. **Left**, the
+simulated scene: road, cars and pedestrians. **Right**, the same seconds in the
+dashboard, with each agent's predicted futures and the risk panel.*
+
 ![Average error of the top guess, straight vs turning, cars and pedestrians](docs/figures/results.png)
 
 * **On straight roads, the baseline wins.** That is exactly constant
@@ -192,6 +198,7 @@ Simulation (about 30 min on a laptop CPU):
 ```bash
 python -m eval.run_predictions && python -m eval.accuracy && python -m eval.risk_eval
 python -m eval.compare_vehicles && python -m eval.compare_pedestrians && python -m eval.make_figures
+python scripts/render_dlp_side_by_side.py --scenario t11_crossing --start 40 --seconds 14 --out demo/t11_side_by_side.gif
 ```
 
 Real data (download and convert DJI_0001–0016 first; the prediction step takes

@@ -18,6 +18,12 @@ calibration recordings), simplified to straight-edged polygons.
 
     python scripts/render_dlp_side_by_side.py --dlp DJI_0003 --start 51.2 --seconds 18 \
         --center 27.3 31.0 --out demo/dlp_side_by_side.gif
+
+With --scenario, the same layout for a simulator scenario (whole map in view;
+the simulator has no parked cars, so the left half shows road and agents):
+
+    python scripts/render_dlp_side_by_side.py --scenario t11_crossing --start 40 --seconds 14 \
+        --out demo/t11_side_by_side.gif
 """
 from __future__ import annotations
 
@@ -129,21 +135,40 @@ def aisle_polygons(bundle, x0, y0, w, h, res=0.1):
 
 
 # -- drawing ------------------------------------------------------------------
+SIM_CAR_M = (4.4, 2.0)                   # the size the dashboard draws simulated cars at
+
+
 class SemanticView:
-    def __init__(self, name, cx, cy, view_m, map_px, caption_h):
+    def __init__(self, name, cx, cy, view_m, map_px, caption_h, sim_map=None):
+        """DLP recording ``name``, or a simulator scenario when ``sim_map`` (its
+        MapBundle) is given: the simulator has no parked cars or parking spaces,
+        so then only the road and the agents are drawn."""
         self.name, self.map_w = name, map_px[0]
         self.view_w, self.view_h = view_m, view_m * 3 / 4
         self.x0, self.y0 = cx - view_m / 2, cy - view_m * 3 / 8
         self.ppm = map_px[0] / view_m
         self.size = (map_px[0], map_px[1] + caption_h)
-        aisles = MapBundle.load("DLP_aisles")
         m = 5.0
-        self.polys = aisle_polygons(aisles, self.x0 - m, self.y0 - m, self.view_w + 2 * m, self.view_h + 2 * m)
-        self.stalls = estimate_stalls(parked_sightings(), aisles.is_drivable)
-        with open(os.path.join(DLP_DIR, f"{name}.meta.json")) as f:
-            meta = json.load(f)
-        self.obstacles = meta["obstacles"]
-        self.agents = meta["agents"]
+        if sim_map is not None:
+            self.polys = aisle_polygons(sim_map, self.x0 - m, self.y0 - m, self.view_w + 2 * m, self.view_h + 2 * m)
+            self.stalls, self.obstacles, self.agents = [], [], {}
+            self.title = f"Scene: simulated T11 car park, scenario {name}   t = {{t:5.1f}} s"
+            self.legend = ((MOVING, "simulated vehicle"), (PED, "pedestrian"), (AISLE, "road"))
+            self.notes = ("Simulated: every car drives 2.5 m/s along fixed routes and",
+                          "pedestrians walk in straight lines at 1.3 m/s (seeded).")
+        else:
+            aisles = MapBundle.load("DLP_aisles")
+            self.polys = aisle_polygons(aisles, self.x0 - m, self.y0 - m, self.view_w + 2 * m, self.view_h + 2 * m)
+            self.stalls = estimate_stalls(parked_sightings(), aisles.is_drivable)
+            with open(os.path.join(DLP_DIR, f"{name}.meta.json")) as f:
+                meta = json.load(f)
+            self.obstacles = meta["obstacles"]
+            self.agents = meta["agents"]
+            self.title = f"Scene: Dragon Lake Parking {name} (real drone data)   t = {{t:5.1f}} s"
+            self.legend = ((MOVING, "tracked vehicle"), (PED, "pedestrian"), (PARKED, "parked (never moves)"),
+                           (EMPTY, "empty space"), (AISLE, "aisle"))
+            self.notes = ("Parking spaces estimated from parked-car positions in 16 recordings;",
+                          "spaces no car ever used can be missing. Data: DLP, CC0.")
         self.font = self._font(13)
         self.small = self._font(11)
         self.label = self._font(9 * SS)
@@ -184,7 +209,8 @@ class SemanticView:
             d.polygon(self.box(o["x_m"], o["y_m"], o["heading_rad"], o["length_m"], o["width_m"]), fill=PARKED)
         for a in tick.agents:
             if a.type == "vehicle":
-                length, width = self.agents[str(a.id)]["size_m"]
+                info = self.agents.get(str(a.id))
+                length, width = info["size_m"] if info else SIM_CAR_M
                 d.polygon(self.box(a.x_m, a.y_m, a.heading_rad, length, width), fill=MOVING, outline="#000000")
             else:
                 cx, cy = self.px(a.x_m, a.y_m)
@@ -205,17 +231,14 @@ class SemanticView:
         out.paste(img, (0, 0))
         c = ImageDraw.Draw(out)
         y = img.height + 8
-        c.text((10, y), f"Scene: Dragon Lake Parking {self.name} (real drone data)   t = {tick.t_s:5.1f} s",
-               fill=INK, font=self.font)
+        c.text((10, y), self.title.format(t=tick.t_s), fill=INK, font=self.font)
         x = 10
-        for colour, text in ((MOVING, "tracked vehicle"), (PED, "pedestrian"), (PARKED, "parked (never moves)"),
-                             (EMPTY, "empty space"), (AISLE, "aisle")):
+        for colour, text in self.legend:
             c.rectangle((x, y + 28, x + 11, y + 39), fill=colour)
             c.text((x + 16, y + 26), text, fill=INK, font=self.small)
             x += 16 + c.textlength(text, font=self.small) + 14
-        c.text((10, y + 50), "Parking spaces estimated from parked-car positions in 16 recordings;",
-               fill=MUTED, font=self.small)
-        c.text((10, y + 66), "spaces no car ever used can be missing. Data: DLP, CC0.", fill=MUTED, font=self.small)
+        c.text((10, y + 50), self.notes[0], fill=MUTED, font=self.small)
+        c.text((10, y + 66), self.notes[1], fill=MUTED, font=self.small)
         c.text((10, y + 90), "Right: what the system predicts on the same seconds.", fill=INK, font=self.small)
         return out
 
@@ -224,6 +247,8 @@ class SemanticView:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dlp", default="DJI_0003")
+    ap.add_argument("--scenario", default=None,
+                    help="a simulator scenario instead of DLP, e.g. t11_crossing (--start is then seconds into it)")
     ap.add_argument("--start", type=float, default=51.2)
     ap.add_argument("--seconds", type=float, default=18.0)
     ap.add_argument("--center", type=float, nargs=2, default=(27.3, 31.0))
@@ -237,15 +262,31 @@ def main() -> None:
     rd = load_render_demo()
     rd.init_headless()
     import pygame
-    pipe, bundle, ticks, status = rd.dlp_setup(args)
-    renderer = rd.DashboardRenderer(bundle)
-    surf = pygame.Surface((rd.CANVAS_W, rd.CANVAS_H))
     right_size = (int(rd.CANVAS_W * args.scale) // 2 * 2, int(rd.CANVAS_H * args.scale) // 2 * 2)
     map_px = (int(800 * args.scale), int(600 * args.scale))
-    left = SemanticView(args.dlp, args.center[0], args.center[1], args.view_m, map_px,
-                        right_size[1] - map_px[1])
+    if args.scenario:
+        # as scripts/render_demo.py does for simulator scenarios: cached predictions, whole map in view
+        from eval.common import SCENARIOS, load_cache, load_ticks
+        from eval.risk_eval import Cached
+        bundle = MapBundle.load(SCENARIOS[args.scenario])
+        res = load_cache(f"pred_{args.scenario}_learned")["results"]
+        pipe = rd.LivePipeline(Cached(res, "vehicle", 0.5, 5, "contextvae"),
+                               Cached(res, "pedestrian", 0.4, 8, "socialvae"))
+        ticks = load_ticks(args.scenario)
+        t0 = ticks[0].t_s + args.start
+        status = {"source": f"replay: {args.scenario}"}
+        left = SemanticView(args.scenario, bundle.x_min + bundle.width_m / 2,
+                            bundle.y_min + bundle.width_m * 3 / 8, bundle.width_m, map_px,
+                            right_size[1] - map_px[1], sim_map=bundle)
+    else:
+        pipe, bundle, ticks, status = rd.dlp_setup(args)
+        t0 = args.start
+        left = SemanticView(args.dlp, args.center[0], args.center[1], args.view_m, map_px,
+                            right_size[1] - map_px[1])
+    renderer = rd.DashboardRenderer(bundle)
+    surf = pygame.Surface((rd.CANVAS_W, rd.CANVAS_H))
 
-    t0, every = args.start, max(1, round(60 / args.fps))
+    every = max(1, round(60 / args.fps))
     with tempfile.TemporaryDirectory() as tmp:
         n = 0
         for i, tick in enumerate(ticks):
