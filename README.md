@@ -4,7 +4,7 @@
 
 A live system that watches a car park, predicts where every car and pedestrian
 will go over the next few seconds, and raises an alert when a car and a person
-are likely to come too close. Cars are predicted by **ContextVAE**, which reads
+are likely to come too close. Cars are predicted by **ContextVAE**, which reads the neighbouring car and
 the road map; pedestrians by **SocialVAE**, which accounts for people nearby.
 Both draw hundreds of possible futures and summarise them as a few candidate
 paths with confidences. It runs on a CPU, with a simulator feeding a live
@@ -119,14 +119,18 @@ uv pip install patchelf
 for f in .venv/lib/python3.10/site-packages/torch/lib/*.so*; do patchelf --clear-execstack "$f"; done
 ```
 
-**Model weights** are not in this repository (`checkpoints/` is ignored):
+**Model weights** are not in this repository (`checkpoints/` is ignored). Both
+are the authors' own pretrained models:
 
-* SocialVAE: `models/sdd/ckpt-best` from the
-  [SocialVAE repository](https://github.com/xupei0610/SocialVAE), copied to
-  `checkpoints/socialvae/ckpt-best`.
-* ContextVAE: `checkpoints/contextvae/ckpt-best`, a model trained with
-  ContextVAE's nuScenes configuration. The upstream repository does not
-  publish weights.
+```bash
+mkdir -p checkpoints/contextvae checkpoints/socialvae
+# ContextVAE, nuScenes / ResNet-18, from the ContextVAE "pretrained" release
+curl -L -o checkpoints/contextvae/ckpt-best \
+  https://github.com/xupei0610/ContextVAE/releases/download/pretrained/nuscenes_res18
+# SocialVAE, Stanford Drone Dataset, from the SocialVAE repository
+curl -L -o checkpoints/socialvae/ckpt-best \
+  https://github.com/xupei0610/SocialVAE/raw/main/models/sdd/ckpt-best
+```
 
 Without weights, everything still runs with the constant-velocity baseline
 (`--models cv`).
