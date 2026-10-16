@@ -1,0 +1,46 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          # CPU-only torch: the default PyPI build bundles CUDA and is several times larger.
+          pip install "torch==1.11.0+cpu" "torchvision==0.12.0+cpu" --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+      - name: Allow torch 1.11 to load on newer glibc
+        # Old torch wheels request an executable stack, which glibc 2.41+ refuses.
+        run: |
+          pip install patchelf
+          for f in $(python -c "import os, torch; print(os.path.dirname(torch.__file__))")/lib/*.so*; do
+            patchelf --clear-execstack "$f"
+          done
+      - name: Unit tests (model-weight tests are skipped without checkpoints)
+        run: pytest -q -rs
+      - name: Smoke test - generate a scenario and run the pipeline on it
+        run: |
+          traj-generate /tmp/smoke.jsonl.gz --seconds 20 --num-pedestrians 6 --crossing-bias 0.5 --seed 1
+          python -c "
+          from trajectory_risk.protocol import load_recording
+          from trajectory_risk.pipeline import LivePipeline
+          from trajectory_risk.predictors import ConstantVelocity
+          _, ticks = load_recording('/tmp/smoke.jsonl.gz')
+          p = LivePipeline(ConstantVelocity(0.5, 5, 6), ConstantVelocity(0.4, 8, 12))
+          n = sum(len(p.step_sync(t)) for t in ticks)
+          print(n, 'predictions'); assert n > 50
+          "

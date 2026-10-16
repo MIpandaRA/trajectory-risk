@@ -21,7 +21,7 @@ def load_checkpoint(path: str, map_location):
     checkpoints (they pickle plain Python objects next to the weights);
     torch 1.11 does not know the keyword at all. Try both."""
     if not os.path.isfile(path):
-        raise FileNotFoundError(f"{path} not found. Run: python scripts/download_checkpoints.py")
+        raise FileNotFoundError(f"{path} not found. See the README for where to get the model weights.")
     try:
         return torch.load(path, map_location=map_location, weights_only=False)
     except TypeError as e:

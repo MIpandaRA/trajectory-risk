@@ -21,3 +21,7 @@ traj-dashboard = "trajectory_risk.apps.dashboard:main"
 traj-replay = "trajectory_risk.apps.replay:main"
 traj-record = "trajectory_risk.apps.record:main"
 traj-generate = "trajectory_risk.apps.generate:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["needs_weights: requires the model checkpoints (skipped when they are absent)"]
