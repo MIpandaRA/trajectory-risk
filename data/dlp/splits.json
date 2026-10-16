@@ -1,0 +1,223 @@
+{
+ "seed": 0,
+ "method": "numpy.random.default_rng(seed).permutation over the sorted names; first 10 -> calibration, rest -> test",
+ "reason": "Reproduces the split fixed in the original project on 2026-10-10 (before any model output was seen there), with the same seed and method. Split by recording to avoid leakage between correlated frames (same drone position, parked cars and people).",
+ "created": "2026-10-16",
+ "calibration": [
+  "DJI_0001",
+  "DJI_0003",
+  "DJI_0004",
+  "DJI_0005",
+  "DJI_0006",
+  "DJI_0008",
+  "DJI_0011",
+  "DJI_0012",
+  "DJI_0013",
+  "DJI_0015"
+ ],
+ "test": [
+  "DJI_0002",
+  "DJI_0007",
+  "DJI_0009",
+  "DJI_0010",
+  "DJI_0014",
+  "DJI_0016"
+ ],
+ "permutation": [
+  "DJI_0003",
+  "DJI_0012",
+  "DJI_0004",
+  "DJI_0011",
+  "DJI_0001",
+  "DJI_0005",
+  "DJI_0008",
+  "DJI_0006",
+  "DJI_0015",
+  "DJI_0013",
+  "DJI_0007",
+  "DJI_0010",
+  "DJI_0014",
+  "DJI_0009",
+  "DJI_0002",
+  "DJI_0016"
+ ],
+ "recordings": {
+  "DJI_0001": {
+   "fov_x_m": [
+    19.46,
+    125.13
+   ],
+   "fov_y_m": [
+    11.66,
+    72.39
+   ],
+   "gate_visible": false
+  },
+  "DJI_0003": {
+   "fov_x_m": [
+    -3.81,
+    112.3
+   ],
+   "fov_y_m": [
+    -2.79,
+    65.06
+   ],
+   "gate_visible": false
+  },
+  "DJI_0004": {
+   "fov_x_m": [
+    -10.61,
+    99.9
+   ],
+   "fov_y_m": [
+    8.07,
+    74.49
+   ],
+   "gate_visible": true
+  },
+  "DJI_0005": {
+   "fov_x_m": [
+    -14.87,
+    106.88
+   ],
+   "fov_y_m": [
+    4.93,
+    75.74
+   ],
+   "gate_visible": true
+  },
+  "DJI_0006": {
+   "fov_x_m": [
+    -1.96,
+    118.86
+   ],
+   "fov_y_m": [
+    0.39,
+    66.66
+   ],
+   "gate_visible": false
+  },
+  "DJI_0008": {
+   "fov_x_m": [
+    -18.16,
+    105.15
+   ],
+   "fov_y_m": [
+    -5.71,
+    65.46
+   ],
+   "gate_visible": false
+  },
+  "DJI_0011": {
+   "fov_x_m": [
+    -9.48,
+    109.15
+   ],
+   "fov_y_m": [
+    -35.11,
+    32.83
+   ],
+   "gate_visible": false
+  },
+  "DJI_0012": {
+   "fov_x_m": [
+    -0.96,
+    100.26
+   ],
+   "fov_y_m": [
+    -1.9,
+    78.49
+   ],
+   "gate_visible": true
+  },
+  "DJI_0013": {
+   "fov_x_m": [
+    -0.77,
+    99.65
+   ],
+   "fov_y_m": [
+    -0.43,
+    78.81
+   ],
+   "gate_visible": true
+  },
+  "DJI_0015": {
+   "fov_x_m": [
+    -3.15,
+    124.76
+   ],
+   "fov_y_m": [
+    0.06,
+    79.26
+   ],
+   "gate_visible": true
+  },
+  "DJI_0002": {
+   "fov_x_m": [
+    19.64,
+    122.39
+   ],
+   "fov_y_m": [
+    12.71,
+    71.86
+   ],
+   "gate_visible": false
+  },
+  "DJI_0007": {
+   "fov_x_m": [
+    -19.46,
+    105.77
+   ],
+   "fov_y_m": [
+    -6.71,
+    65.65
+   ],
+   "gate_visible": false
+  },
+  "DJI_0009": {
+   "fov_x_m": [
+    -14.84,
+    101.94
+   ],
+   "fov_y_m": [
+    5.84,
+    72.73
+   ],
+   "gate_visible": true
+  },
+  "DJI_0010": {
+   "fov_x_m": [
+    29.95,
+    148.41
+   ],
+   "fov_y_m": [
+    -1.01,
+    64.91
+   ],
+   "gate_visible": false
+  },
+  "DJI_0014": {
+   "fov_x_m": [
+    -2.18,
+    134.27
+   ],
+   "fov_y_m": [
+    0.73,
+    79.2
+   ],
+   "gate_visible": true
+  },
+  "DJI_0016": {
+   "fov_x_m": [
+    -1.68,
+    114.33
+   ],
+   "fov_y_m": [
+    -1.75,
+    80.47
+   ],
+   "gate_visible": true
+  }
+ },
+ "fov_note": "fov_x_m / fov_y_m = extent of agent positions in the recording (a lower bound on the drone's view); gate_visible = that box reaches x <= 12.0 m and y >= 70.0 m, so the entrance at (15.0, 75.0) is in view."
+}

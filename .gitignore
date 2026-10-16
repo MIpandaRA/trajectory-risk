@@ -1,5 +1,6 @@
-#file too big
-data/dlp/
+#file too big (the DLP split stays tracked: it records which recordings are test data)
+data/dlp/*
+!data/dlp/splits.json
 maps/OneNorthRoundabout/semantic_map.pkl
 
 #licensed, not for me to publish

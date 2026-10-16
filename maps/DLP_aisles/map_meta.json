@@ -1,0 +1,155 @@
+{
+  "world_width_m": 180.0,
+  "world_height_m": 135.0,
+  "world_origin_x": -25.0,
+  "world_origin_y": -45.0,
+  "pixels_per_metre": 4.444444444444445,
+  "lot_m": {
+    "x": [
+      0.0,
+      140.0
+    ],
+    "y": [
+      0.0,
+      80.0
+    ]
+  },
+  "mapped_area_m": {
+    "x": [
+      -25.0,
+      155.0
+    ],
+    "y": [
+      -40.0,
+      85.0
+    ]
+  },
+  "road_category": null,
+  "source": "Dragon Lake Parking dataset, Shen, Pan, Govindarajan, Borrelli (UC Berkeley), CC0, https://zenodo.org/records/10084683",
+  "built_from": [
+    "DJI_0001",
+    "DJI_0003",
+    "DJI_0004",
+    "DJI_0005",
+    "DJI_0006",
+    "DJI_0008",
+    "DJI_0011",
+    "DJI_0012",
+    "DJI_0013",
+    "DJI_0015"
+  ],
+  "built_from_split": "calibration",
+  "split_file": "data/dlp/splits.json",
+  "split_seed": 0,
+  "excluded_recordings": [
+    "DJI_0002",
+    "DJI_0007",
+    "DJI_0009",
+    "DJI_0010",
+    "DJI_0014",
+    "DJI_0016"
+  ],
+  "variant": "aisles",
+  "semantic_pixels_per_metre": 1.0,
+  "semantic_margin_m": 210,
+  "semantic_channels": {
+    "0": "drivable = 0.5 on the aisles area, -1 elsewhere",
+    "1": "road_divider: -1 everywhere (none in a parking lot)",
+    "2": "lane_divider: -1 everywhere"
+  },
+  "fov_x_m": [
+    -18.16,
+    125.13
+  ],
+  "fov_x_m_per_recording": {
+    "DJI_0001": [
+      19.46,
+      125.13
+    ],
+    "DJI_0003": [
+      -3.81,
+      112.3
+    ],
+    "DJI_0004": [
+      -10.61,
+      99.9
+    ],
+    "DJI_0005": [
+      -14.87,
+      106.88
+    ],
+    "DJI_0006": [
+      -1.96,
+      118.86
+    ],
+    "DJI_0008": [
+      -18.16,
+      105.15
+    ],
+    "DJI_0011": [
+      -9.48,
+      109.15
+    ],
+    "DJI_0012": [
+      -0.96,
+      100.26
+    ],
+    "DJI_0013": [
+      -0.77,
+      99.65
+    ],
+    "DJI_0015": [
+      -3.15,
+      124.76
+    ]
+  },
+  "fov_y_m_per_recording": {
+    "DJI_0001": [
+      11.66,
+      72.39
+    ],
+    "DJI_0003": [
+      -2.79,
+      65.06
+    ],
+    "DJI_0004": [
+      8.07,
+      74.49
+    ],
+    "DJI_0005": [
+      4.93,
+      75.74
+    ],
+    "DJI_0006": [
+      0.39,
+      66.66
+    ],
+    "DJI_0008": [
+      -5.71,
+      65.46
+    ],
+    "DJI_0011": [
+      -35.11,
+      32.83
+    ],
+    "DJI_0012": [
+      -1.9,
+      78.49
+    ],
+    "DJI_0013": [
+      -0.43,
+      78.81
+    ],
+    "DJI_0015": [
+      0.06,
+      79.26
+    ]
+  },
+  "approximations": [
+    "Derived from the CC0 recordings only, not from the GPL-3 toolkit map: the drivable area is where vehicles were seen, so parts of the lot outside the drone's view (fov_*_per_recording) or never driven or parked in during the recordings listed in built_from are missing.",
+    "Moving-vehicle centre traces (speed >= 0.3 m/s) drawn 2.0 m wide; parked footprints are DLP obstacles plus vehicle agents stopped >= 30 s; enclosed holes <= 40.0 m2 filled.",
+    "aisles variant: stall bands = parked footprints grown to 5.2 x 2.6 m and closed with a 1.5 m disk; rows with no parked car in any recording stay drivable.",
+    "world_* describe a 4:3 dashboard view around mapped_area_m, not the lot itself (lot_m)."
+  ],
+  "_comment": "fov_x_m is the drone's x-range estimated as the extent of all agent positions (union over built_from); the drone was not in the same place for every recording, so the per-recording ranges differ and are what censoring uses. Tracks that start or end within 5 m of their recording's range were cut off by the camera, not real entries/exits; see the per-agent censored_start / censored_end flags in data/dlp/<recording>.meta.json."
+}
