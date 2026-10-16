@@ -1,0 +1,9 @@
+scenario,models,pair_updates,dangerous_share,auroc,events,caught,recall,false_alarms,false_alarms_per_min,warning_s_median
+t11_crossing,learned,21621,0.0134,0.9955,13,13,1.0,11,5.5008,2.6
+t11_busy,learned,34841,0.016,0.9986,26,26,1.0,8,4.0006,2.8
+onenorth,learned,62430,0.0005,0.9241,3,2,0.6667,2,1.0001,1.5583
+ALL,learned,118892,0.0074,0.9951,42,41,0.9762,21,3.5005,2.6
+t11_crossing,cv,21621,0.0134,0.9061,13,12,0.9231,4,2.0003,2.4
+t11_busy,cv,34841,0.016,0.9037,26,25,0.9615,1,0.5001,2.2
+onenorth,cv,62430,0.0005,0.8485,3,2,0.6667,0,0.0,1.5583
+ALL,cv,118892,0.0074,0.9025,42,39,0.9286,5,0.8334,2.2
