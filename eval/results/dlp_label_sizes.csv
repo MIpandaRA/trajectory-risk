@@ -1,0 +1,6 @@
+quantity,n,p5,median,p95,max
+parked_half_width,2220,0.934,1.05,1.367,1.603
+pedestrian_half_length,1099,0.416,0.416,0.416,0.416
+pedestrian_half_width,1099,0.416,0.416,0.416,0.416
+vehicle_half_length,391,2.156,2.406,2.612,3.014
+vehicle_half_width,391,0.958,1.094,1.187,1.405

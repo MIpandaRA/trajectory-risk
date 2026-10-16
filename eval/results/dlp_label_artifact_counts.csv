@@ -1,0 +1,12 @@
+recording,positives,overlap_gap_le_0,flagged_artifact,co_moving_any_gap,deep_overlap_any_speed
+DJI_0001,0,0,0,0,0
+DJI_0003,417,79,0,0,26
+DJI_0004,741,270,235,241,255
+DJI_0005,297,0,0,0,0
+DJI_0006,1084,88,25,141,44
+DJI_0008,1274,99,15,46,52
+DJI_0011,184,20,0,0,1
+DJI_0012,366,3,0,16,1
+DJI_0013,329,21,0,0,0
+DJI_0015,1253,6,0,27,0
+ALL,5945,586,275,471,379
