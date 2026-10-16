@@ -8,8 +8,10 @@ scores risk and draws.
 
 ```mermaid
 flowchart LR
-    subgraph PRODUCER["Producer: sends positions"]
+    subgraph SOURCES["Where positions come from"]
         SIM["<b>sim/</b><br/>simulated car park"]
+        DLP["<b>Dragon Lake Parking</b><br/>real drone recordings"]
+        CONV["<b>datasets/dlp.py</b><br/>25 Hz frames → 60 Hz ticks"]
         REC["<b>apps/replay.py</b><br/>recorded scenario"]
     end
 
@@ -20,8 +22,11 @@ flowchart LR
     PRED["<b>predictors/</b><br/>ContextVAE, SocialVAE,<br/>constant velocity"]
     RISK["<b>risk.py</b><br/>car–person risk, alerts"]
     DASH["<b>dashboard/</b><br/>draws it live"]
+    MAP["<b>datasets/dlp_map.py</b><br/>road map from where<br/>cars actually drove"]
+    EVAL["<b>eval/</b> + <b>calibration.py</b><br/>event labels, calibration,<br/>alert evaluation"]
     GEO["<b>geometry.py</b><br/>screen ↔ world ↔ ego"]
 
+    DLP --> CONV --> REC
     SIM --> TRANS
     REC --> TRANS
     TRANS --> PROTO
@@ -32,15 +37,21 @@ flowchart LR
     PRED --> DASH
     RISK --> DASH
 
+    DLP -. "calibration<br/>recordings only" .-> MAP
+    MAP -. "road map" .-> PRED
+    RISK -. "offline, same code" .-> EVAL
     GEO -. "pixels ↔ metres" .-> SIM
     GEO -. "pixels ↔ metres" .-> DASH
     GEO -. "rotate into the<br/>model's frame" .-> PRED
 
-    classDef node fill:#d4edda,stroke:#2e7d32,stroke-width:2px,color:#000
-    class SIM,REC,TRANS,PROTO,TRACK,WORK,PRED,RISK,DASH,GEO node
+    classDef mod fill:#d4edda,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef data fill:#dbe8fb,stroke:#2a5ea8,stroke-width:2px,color:#000
+    class SIM,CONV,REC,TRANS,PROTO,TRACK,WORK,PRED,RISK,DASH,MAP,EVAL,GEO mod
+    class DLP data
 ```
 
-Solid arrows carry data; dotted arrows mean "uses these conversions".
+Solid arrows carry live data; dotted arrows are inputs built offline or
+conversions ("uses these"). Blue is external data; green is this repository's code.
 `pipeline.py` is everything inside the dashboard except the network, the
 threads and the drawing, so the offline evaluation runs the same code as the
 live system.
@@ -57,7 +68,10 @@ live system.
 | `predictors/` | One interface, three models: constant velocity (the baseline), ContextVAE for cars (uses the road map), SocialVAE for pedestrians (uses nearby people). The learned models draw hundreds of futures and cluster them into 10–20 candidates. | The rest of the system never needs to know which model answered, so models can be swapped and compared. The network code in `third_party/` is unmodified upstream code. |
 | `runtime/worker.py` | Runs each model on a background thread. | The window never waits for a model. If a new request for an agent arrives while its old one is still waiting, the old one is dropped instead of queued. |
 | `risk.py` | Drops the stale part of each prediction, puts car and pedestrian candidates on one 0.1 s clock, finds each pair's closest approach at the same moment, and turns it into a risk score and an on/off alert. | Same-time distance, not path intersection: two paths that cross 5 s apart are safe. |
-| `dashboard/`, `apps/` | The window, and the command-line programs (`traj-producer`, `traj-dashboard`, `traj-replay`, `traj-record`, `traj-generate`). | Drawing only, no logic, so the same frames can be rendered live or offline. |
+| `dashboard/`, `apps/` | The window, and the command-line programs (`traj-producer`, `traj-dashboard`, `traj-replay`, `traj-record`, `traj-generate`, `traj-dlp-convert`). | Drawing only, no logic, so the same frames can be rendered live or offline. |
+| `datasets/dlp.py` | Converts Dragon Lake Parking drone recordings into the same ticks as the simulator: resamples 25 Hz frames onto an exact 60 Hz grid, unwraps headings, maps labels, keeps parked cars out of the stream, marks tracks cut by the drone's view. | Real data enters through the same protocol as simulated data, so everything downstream runs unchanged. Without resampling, vehicles never fill their 0.5 s history and are never predicted. |
+| `datasets/dlp_map.py` | Builds ContextVAE's road map from where vehicles actually drove, using the calibration recordings only, with a 210 m border of "no road". | The toolkit's drawn map is GPL-3. Building the map from test recordings would hand the model the test cars' paths. |
+| `calibration.py`, `eval/dlp_*.py` | Event labels from true positions, reliability, ECE and Brier score, Platt and isotonic recalibration, a bootstrap over whole recordings, and the alert evaluation. | Recalibration is fitted on calibration recordings and applied unchanged to test. Recordings, not pair-updates, are the independent units. |
 
 The code is an installable Python package (`pyproject.toml`, `src/trajectory_risk/`),
 so every part imports it by one unique name. The original prototype loaded two

@@ -1,4 +1,4 @@
-# Trajectory prediction and collision-risk alerts
+# Variational Bayesian trajectory prediction and collision-risk alerts
 
 [![tests](https://github.com/MIpandaRA/trajectory-risk/actions/workflows/tests.yml/badge.svg)](https://github.com/MIpandaRA/trajectory-risk/actions/workflows/tests.yml)
 
@@ -6,11 +6,22 @@ A live system that watches a car park, predicts where every car and pedestrian
 will go over the next few seconds, and raises an alert when a car and a person
 are likely to come too close. Cars are predicted by **ContextVAE**, which reads the neighbouring car and
 the road map; pedestrians by **SocialVAE**, which accounts for people nearby.
-Both draw hundreds of possible futures and summarise them as a few candidate
-paths with confidences. It runs on a CPU, with a simulator feeding a live
+Both are conditional variational autoencoders: they draw hundreds of possible
+futures and summarise them as a few candidate paths with confidences. It runs
+on a CPU, on a built-in simulator and on real drone recordings, feeding a live
 dashboard at 60 updates a second.
 
-![Constant velocity vs ContextVAE on a straight road and a turn](docs/figures/examples_cars.png)
+![Left: the scene, drawn from the recordings. Right: live predictions, calibrated risk and alerts on the same seconds](demo/dlp_side_by_side.gif)
+
+*Real drone data: [Dragon Lake Parking](https://sites.google.com/berkeley.edu/dlp-dataset)
+recording DJI_0003, 51–69 s. **Left**, the scene: parked cars, aisles, the
+tracked vehicles and pedestrians, all drawn from the CC0 recordings (parking
+spaces are estimated from where cars parked). **Right**, the same seconds in the
+dashboard: orange and violet lines are the predicted futures of vehicles and
+pedestrians, a red ring is an active alert, and the panel lists the calibrated
+risk of each car–pedestrian pair. The dataset authors' own semantic
+visualization and annotated video are on their
+[project page](https://sites.google.com/berkeley.edu/dlp-dataset).*
 
 ## What it does
 
@@ -24,80 +35,95 @@ dashboard at 60 updates a second.
   to switch on and several low ones to switch off.
 * **Stays responsive when the models are slow.** Models run on background
   threads; a new request replaces a waiting one instead of queueing behind it.
-* **Is measured against a simple baseline.** Every result is compared with
-  constant velocity: "everyone keeps going straight at their current speed".
+* **Is measured, not just demoed.** Every result is compared with constant
+  velocity ("everyone keeps going straight at their current speed"), and the
+  real-data evaluation follows an analysis plan fixed before any model ran.
 
-## Results (simulation)
+## Results on real data
 
-All results below are from the built-in simulator, on two maps: **T11**, a
-small car park, and **OneNorth**, a nuScenes map (the data ContextVAE was
-trained on). They are not real-world performance; see
-[Limitations](#limitations).
+16 recordings of the Dragon Lake Parking dataset (a 140 × 80 m car park, drone
+tracking at 25 Hz), split **by recording** into 10 calibration and 6 test
+recordings with a fixed seed. The map and every fitted parameter come from the
+calibration recordings only. Results are on the test recordings, for car–pedestrian
+pairs within 15 m; ranges are 95% bootstrap intervals over the 6 recordings.
 
-### Prediction accuracy
+**The event.** A car and a pedestrian come within **2.5 m** (centre to centre)
+at some moment in the next 3 s **while the car is moving** faster than 0.5 m/s.
+2.5 m is half a car's measured width (1.09 m) + half a pedestrian's box
+(0.42 m) + a 1 m margin. The definition was fixed from true positions only,
+before any model output existed ([docs/dlp_event_definition.md](docs/dlp_event_definition.md)).
+It is rare: 0.81% of nearby pair-updates, from 177 separate encounters in the
+test recordings.
+
+| Finding | Number |
+|---|---|
+| The raw risk score is overconfident | expected calibration error 0.069, about 8.5× the base rate |
+| Recalibrated (isotonic, fitted on calibration recordings) | calibration error **0.0012**; Brier skill **0.18 [0.05, 0.27]**† |
+| Learned vs constant-velocity score, at the baseline's 61% recall | precision **0.07** vs **0.63**†; the baseline scores 0 on 39% of conflict moments† |
+| Demo alert setting, run once on test | 1.34 false alerts/min [0.61, 2.02], **72%** of conflicts caught, median warning **−0.25 s**† |
+
+† Exploratory: analyses added after the test results had been seen.
+
+* **The raw score ranks well but is not a probability.** It ranks dangerous
+  moments above safe ones well (AUROC 0.94), but its numbers are about ten
+  times too high.
+  Fitted on separate recordings, recalibration fixes this, leaving a modest
+  real improvement over always predicting the base rate (Brier skill 0.18).
+* **Constant velocity is the better alarm where an alarm would operate.** At
+  the same recall it is right nine times as often. The learned score's
+  advantage is coverage: it is the only one of the two that can catch more than
+  61% of conflicts, at much lower precision.
+* **Alerts detect conflicts; they do not warn ahead of them.** 103 of the 128
+  alerted conflicts were flagged after the car and pedestrian had already come
+  within 2.5 m. The simulator's advance warning (below) did not carry over to
+  real traffic. Why is still an open question: stale predictions, the
+  two-update alert rule (about 0.45 s), or a score that tracks current rather
+  than future closeness.
+
+## Results in simulation
+
+The built-in simulator, on two maps: **T11**, a small car park, and
+**OneNorth**, a nuScenes map (the data ContextVAE was trained on). Simulated
+cars never change speed and pedestrians walk in straight lines, which flatters
+constant velocity.
 
 ![Average error of the top guess, straight vs turning, cars and pedestrians](docs/figures/results.png)
 
-Average distance between the most confident predicted path and what actually
-happened (lower is better):
-
-* **On straight roads, the baseline wins.** Simulated cars never change speed,
-  which is exactly constant velocity's assumption.
+* **On straight roads, the baseline wins.** That is exactly constant
+  velocity's assumption.
 * **On turns, ContextVAE wins for cars**: its predictions bend with the road.
   On OneNorth, where cars are faster, the gap is larger: 8.0 m vs 9.8 m on
   turns, while on straight roads the baseline is far ahead (0.78 m vs 2.61 m).
-* **For pedestrians, the baseline wins everywhere.** Simulated pedestrians walk
-  in straight lines; SocialVAE, trained on real people who wander, predicts a
-  spread they never show.
+* **For pedestrians, the baseline wins everywhere.** SocialVAE, trained on real
+  people who wander, predicts a spread that simulated walkers never show.
 * **The learned models usually have a good guess, but not first.** The black
   line in each blue bar is the best of all their candidates.
 
+![Constant velocity vs ContextVAE, straight and turning](docs/figures/examples_cars.png)
+
 ![Constant velocity vs SocialVAE, straight and turning](docs/figures/examples_pedestrians.png)
 
-### Alerts
-
-Does the alert fire when a car and a pedestrian really come within 2.2 m in the
-next 3 s, and how early? All scenarios, with the default alert settings:
-
-| | Learned models | Constant velocity |
+| Alerts, all simulated scenarios, default settings | Learned models | Constant velocity |
 |---|---|---|
 | Danger events caught | **41 of 42** | 39 of 42 |
 | False alarms per minute | 3.5 | **0.8** |
 | Median warning before closest approach | **2.6 s** | 2.2 s |
-| AUROC (how well the score ranks dangerous moments above safe ones) | **0.995** | 0.902 |
-
-The learned models catch more and warn earlier, at about four times the false
-alarms. Full numbers: [`eval/results/`](eval/results/).
-
-## How it was verified
-
-This repository is a rebuild of an earlier prototype, checked piece by piece
-rather than trusted:
-
-* **Against the original model code.** The network files in
-  `src/trajectory_risk/third_party/` are byte-identical to the upstream
-  ContextVAE and SocialVAE repositories, and the input preparation (rotating
-  each car into its own frame, cropping the map) was checked line by line
-  against ContextVAE's training code.
-* **Against the prototype's frozen output.** Given the same input and random
-  seed, both models reproduce the prototype's 2,000 and 740 sampled futures to
-  within 0.02 mm (`tests/test_models.py`).
-* **Against the earlier results.** Rerunning the full evaluation reproduces the
-  earlier constant-velocity and alert numbers exactly, and the learned-model
-  accuracy to within 0.01 m.
-* **On a clean machine.** CI installs the package from scratch and runs the
-  test suite on every push.
 
 ## How it works
 
-```
-simulator ──ticks (JSON over TCP)──▶ protocol ──▶ tracking ──▶ predictors ──▶ risk ──▶ dashboard
-  (60/s, world metres)            (validate)   (one sample    (ContextVAE,   (closest
-                                               every 0.5 s /   SocialVAE,     approach,
-                                               0.4 s)          baseline)      alerts)
+```mermaid
+flowchart LR
+    SIM["simulator"] --> PROTO
+    DLP["Dragon Lake Parking<br/>recordings"] --> CONV["converter<br/>25 Hz → 60 Hz"] --> PROTO
+    PROTO["protocol<br/>validated ticks"] --> TRACK["tracking<br/>each agent's recent path"]
+    TRACK --> PRED["predictors<br/>ContextVAE, SocialVAE,<br/>constant velocity"]
+    MAP["road map from<br/>calibration recordings"] -.-> PRED
+    PRED -- "candidate paths<br/>+ confidences" --> RISK["risk<br/>closest approach,<br/>alerts"]
+    RISK --> DASH["dashboard"]
+    RISK -. "offline, same code" .-> EVAL["evaluation<br/>labels, calibration,<br/>alert metrics"]
 ```
 
-Module-by-module description: [docs/architecture.md](docs/architecture.md).
+Module by module, with the reason each one exists: [docs/architecture.md](docs/architecture.md).
 
 ## Quick start
 
@@ -147,15 +173,40 @@ traj-dashboard --map T11                                                       #
 In the dashboard: **D** debug overlay (model latency, superseded requests),
 **A** alternative candidates, **Esc** quit.
 
-### Reproduce the results
+### Real drone data
 
 ```bash
-python -m eval.run_predictions        # all scenarios, both model sets (about 30 min on a laptop CPU)
-python -m eval.accuracy               # eval/results/accuracy_*.csv
-python -m eval.risk_eval              # eval/results/risk_*.csv
-python -m eval.compare_vehicles       # tables behind docs/figures/results.png
-python -m eval.compare_pedestrians
-python -m eval.make_figures           # docs/figures/*.png
+python scripts/download_dlp.py DJI_0003      # raw JSON from Zenodo -> data/dlp/raw/ (not in git)
+traj-dlp-convert DJI_0003                    # -> data/dlp/DJI_0003.jsonl.gz
+traj-replay data/dlp/DJI_0003.jsonl.gz       # terminal 1
+traj-dashboard --map DLP                     # terminal 2
+```
+
+This repository uses recordings DJI_0001–0016. DJI_0017–0030 have never been
+used and are reserved for a pre-registered follow-up study.
+
+### Reproduce the results
+
+Simulation (about 30 min on a laptop CPU):
+
+```bash
+python -m eval.run_predictions && python -m eval.accuracy && python -m eval.risk_eval
+python -m eval.compare_vehicles && python -m eval.compare_pedestrians && python -m eval.make_figures
+```
+
+Real data (download and convert DJI_0001–0016 first; the prediction step takes
+about a day and a half on a laptop CPU, everything else minutes):
+
+```bash
+# the calibration/test split is fixed and in git: data/dlp/splits.json
+traj-dlp-convert --split calibration --build-map --no-convert                   # maps/DLP (also in git)
+python -m eval.dlp_labels && python -m eval.dlp_label_quality                   # event labels
+python -m eval.dlp_predict --models cv learned --split calibration test         # predictions
+python -m eval.dlp_risk --models learned cv --split calibration test
+python -m eval.dlp_calibration --split calibration && python -m eval.dlp_calibration --split test
+python -m eval.dlp_exploratory && python -m eval.dlp_exploratory --extra        # † analyses
+python -m eval.dlp_alerts && python -m eval.dlp_alerts --test-once              # alert setting
+python scripts/render_dlp_side_by_side.py                                       # demo/dlp_side_by_side.gif
 ```
 
 The OneNorth scenario needs `maps/OneNorthRoundabout/semantic_map.pkl` (85 MB,
@@ -172,10 +223,11 @@ files are absent.
 
 ## Limitations
 
-* **Simulation only, so far.** Simulated cars never brake or change speed and
-  pedestrians walk in straight lines, which flatters the constant-velocity
-  baseline. Advance warning in simulation does not imply advance warning on
-  real traffic; a real-data evaluation is the next step.
+* **Detection, not warning.** On real data alerts arrive a median 0.25 s after
+  a conflict starts. That is too late to be useful for collision avoidance.
+* **A small test set.** 6 test recordings and 177 conflicts in one car park, so
+  the intervals are wide. Several headline numbers are exploratory (†) and
+  need confirming on unseen recordings.
 * **Car and pedestrian are assumed not to react to each other.** The risk score
   multiplies the car's and the pedestrian's candidate confidences, which is
   only valid if their futures are independent. In reality a pedestrian who sees
@@ -185,11 +237,13 @@ files are absent.
   **joint prediction model** that samples both agents' futures together as
   consistent pairs.
 * **Confidences are not probabilities.** A candidate's confidence is the share
-  of the model's samples near it, so the risk score is a score, not a
-  calibrated chance of collision. The alert threshold is therefore set
-  empirically, not from costs.
-* **Default alert settings are the prototype's.** They trade many false alarms
-  for early warning; other thresholds are in `eval/results/risk_threshold_sweep.csv`.
+  of the model's samples near it, so the raw risk score is a score, not a
+  calibrated chance of collision; on real data it needs recalibrating.
+* **Distance ignores direction.** The event uses centre-to-centre distance, so
+  a pedestrian just in front of a bumper (about 3 m from a car's centre) is not
+  an event. Front and back approaches are 1–5% of conflicts here.
+* **Cyclists are left out.** DLP has 28 in total; SocialVAE was trained on
+  walkers only.
 * **CPU latency.** On a laptop CPU, ContextVAE takes about half a second per
   prediction, so live predictions can be over a second old by the time they
   are scored.
@@ -199,6 +253,13 @@ files are absent.
 ## Acknowledgements and licences
 
 * Code in this repository: [MIT](LICENSE), © 2026 MIpandaRA.
+* **Dragon Lake Parking dataset**: Shen, Pan, Govindarajan, Borrelli (UC
+  Berkeley MPC Lab), [CC0](https://zenodo.org/records/10084683)
+  (doi:10.5061/dryad.tht76hf5b). Please cite: X. Shen, M. Lacayo, N. Guggilla,
+  F. Borrelli, "ParkPredict+: Multimodal Intent and Motion Prediction for
+  Vehicles in Parking Lots with CNN and Transformer", IEEE ITSC 2022,
+  doi:10.1109/ITSC55140.2022.9922162. The maps in `maps/DLP*` are derived from
+  the CC0 recordings only, not from the dataset's GPL-3 toolkit.
 * **ContextVAE** network (`src/trajectory_risk/third_party/contextvae`): MIT,
   © 2023 徐霈 (Pei Xu). Xu, Hayet, Karamouzas, "Context-Aware Timewise VAEs for
   Real-Time Vehicle Trajectory Prediction", IEEE RA-L 8(9), 2023.
