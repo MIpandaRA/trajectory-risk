@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "trajectory-risk"
 version = "0.1.0"
 requires-python = ">=3.10,<3.11" # have not tested on 3.9, once tested I can include >=3.9,<3.11
-dependencies = ["numpy>=1.22,<2", "torch==1.11.0", "torchvision==0.12.0", "scikit-learn>=1.0"]
+dependencies = ["numpy>=1.22,<2", "torch==1.11.0", "torchvision==0.12.0", "scikit-learn>=1.0", "opencv-python-headless>=4.5", "Pillow>=9", "pygame>=2.1"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "matplotlib>=3.6"]
@@ -14,3 +14,10 @@ dev = ["pytest>=7", "matplotlib>=3.6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.scripts]
+traj-producer = "trajectory_risk.apps.producer:main"
+traj-dashboard = "trajectory_risk.apps.dashboard:main"
+traj-replay = "trajectory_risk.apps.replay:main"
+traj-record = "trajectory_risk.apps.record:main"
+traj-generate = "trajectory_risk.apps.generate:main"
