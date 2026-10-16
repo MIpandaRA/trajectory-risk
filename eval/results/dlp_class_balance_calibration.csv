@@ -1,0 +1,9 @@
+split,subset,event,pair_updates,positives,negatives,per_10k,encounters,positives_flagged_artifact,n_recordings
+calibration,all,event_d2,6340915,1644,6339271,2.5927,83,257,10
+calibration,all,event_d2.5,6340915,5230,6335685,8.248,280,275,10
+calibration,all,event_d2.5_moving1,6340915,4379,6336536,6.9059,252,0,10
+calibration,all,event_d3,6340915,12170,6328745,19.1928,618,294,10
+calibration,within_15m,event_d2,656051,1643,654408,25.0438,83,257,10
+calibration,within_15m,event_d2.5,656051,5225,650826,79.6432,280,275,10
+calibration,within_15m,event_d2.5_moving1,656051,4374,651677,66.6716,252,0,10
+calibration,within_15m,event_d3,656051,12142,643909,185.0771,618,294,10

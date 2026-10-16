@@ -1,0 +1,9 @@
+models,score,event,subset,platt_a,platt_b,isotonic_steps,fitted_on
+learned,a_d2.5,event_d2.5,all,0.3257,-5.3208,52,calibration recordings only
+learned,a_d2.5,event_d2.5,within_15m,0.2024,-4.2713,52,calibration recordings only
+learned,b_d2.5,event_d2.5,all,0.5364,-3.882,66,calibration recordings only
+learned,b_d2.5,event_d2.5,within_15m,0.4083,-3.4158,66,calibration recordings only
+cv,a_d2.5,event_d2.5,all,0.3205,-5.3822,2,calibration recordings only
+cv,a_d2.5,event_d2.5,within_15m,0.1938,-4.2152,2,calibration recordings only
+cv,b_d2.5,event_d2.5,all,0.4793,-3.639,2,calibration recordings only
+cv,b_d2.5,event_d2.5,within_15m,0.357,-2.4894,2,calibration recordings only

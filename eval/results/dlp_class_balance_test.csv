@@ -1,0 +1,9 @@
+split,subset,event,pair_updates,positives,negatives,per_10k,encounters,positives_flagged_artifact,n_recordings
+test,all,event_d2,4530046,889,4529157,1.9625,54,60,6
+test,all,event_d2.5,4530046,3249,4526797,7.1721,177,66,6
+test,all,event_d2.5_moving1,4530046,2743,4527303,6.0551,156,40,6
+test,all,event_d3,4530046,8277,4521769,18.2713,414,66,6
+test,within_15m,event_d2,401032,885,400147,22.0681,54,60,6
+test,within_15m,event_d2.5,401032,3233,397799,80.617,177,66,6
+test,within_15m,event_d2.5_moving1,401032,2727,398305,67.9996,156,40,6
+test,within_15m,event_d3,401032,8237,392795,205.3951,414,66,6
