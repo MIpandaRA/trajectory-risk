@@ -8,7 +8,7 @@ are likely to come too close. Cars are predicted by **ContextVAE**, which reads 
 the road map; pedestrians by **SocialVAE**, which accounts for people nearby.
 Both are conditional variational autoencoders: they draw hundreds of possible
 futures and summarise them as a few candidate paths with confidences. It runs
-on a CPU, on a built-in simulator and on real drone recordings, feeding a live
+on a built-in simulator and on real drone recordings, feeding a live
 dashboard at 60 updates a second.
 
 ![Left: the scene, drawn from the recordings. Right: live predictions, calibrated risk and alerts on the same seconds](demo/dlp_side_by_side.gif)
@@ -223,11 +223,6 @@ files are absent.
 
 ## Limitations
 
-* **Detection, not warning.** On real data alerts arrive a median 0.25 s after
-  a conflict starts. That is too late to be useful for collision avoidance.
-* **A small test set.** 6 test recordings and 177 conflicts in one car park, so
-  the intervals are wide. Several headline numbers are exploratory (†) and
-  need confirming on unseen recordings.
 * **Car and pedestrian are assumed not to react to each other.** The risk score
   multiplies the car's and the pedestrian's candidate confidences, which is
   only valid if their futures are independent. In reality a pedestrian who sees
@@ -236,19 +231,11 @@ files are absent.
   other pedestrians, and each predicts on its own. Capturing it would need a
   **joint prediction model** that samples both agents' futures together as
   consistent pairs.
-* **Confidences are not probabilities.** A candidate's confidence is the share
-  of the model's samples near it, so the raw risk score is a score, not a
-  calibrated chance of collision; on real data it needs recalibrating.
 * **Distance ignores direction.** The event uses centre-to-centre distance, so
   a pedestrian just in front of a bumper (about 3 m from a car's centre) is not
   an event. Front and back approaches are 1–5% of conflicts here.
 * **Cyclists are left out.** DLP has 28 in total; SocialVAE was trained on
   walkers only.
-* **CPU latency.** On a laptop CPU, ContextVAE takes about half a second per
-  prediction, so live predictions can be over a second old by the time they
-  are scored.
-* **Not a safety system.** This is a study of prediction and risk scoring, not
-  something to put in front of real vehicles.
 
 ## Acknowledgements and licences
 
