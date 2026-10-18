@@ -2,13 +2,13 @@
 
 [![tests](https://github.com/MIpandaRA/trajectory-risk/actions/workflows/tests.yml/badge.svg)](https://github.com/MIpandaRA/trajectory-risk/actions/workflows/tests.yml)
 
-A live system that watches a car park, predicts where every car and pedestrian
+A live system with an overview of a car park, predicts where every car and pedestrian
 will go over the next few seconds, and raises an alert when a car and a person
-are likely to come too close. Cars are predicted by **ContextVAE**, which reads the neighbouring car and
-the road map; pedestrians by **SocialVAE**, which accounts for people nearby.
-Both are conditional variational autoencoders: they draw hundreds of possible
-futures and summarise them as a few candidate paths with confidences. It runs
-on a built-in simulator and on real drone recordings, feeding a live
+are likely to come too close. Cars are predicted by **ContextVAE**, which takes in account neighbouring cars and
+the map, pedestrians are predicted by **SocialVAE**, which accounts for people nearby.
+Both are conditional variational autoencoders. These models take past movements and then draw hundreds of possible
+futures, collapses them to a few candidate paths with confidences scores. It runs
+on a built-in simulator and tested on real drone recordings, feeding a live
 dashboard at 60 updates a second.
 
 ![Left: the scene, drawn from the recordings. Right: live predictions, calibrated risk and alerts on the same seconds](demo/dlp_side_by_side.gif)
